@@ -30,3 +30,31 @@ npm run preview  # посмотреть собранную версию
 - `src/main.ts` — курсор-клубочек, экраны (меню, HUD, итоги), настройки в localStorage,
   игровой цикл на `requestAnimationFrame`.
 - `src/style.css` — темы (светлая/тёмная), панель, все анимации в keyframes.
+
+## Telegram Mini App
+
+Тот же билд с GitHub Pages открывается внутри Telegram как Mini App. В обычном браузере
+ничего не меняется: интеграция в `src/telegram.ts` включается только внутри Telegram.
+
+Что делает интеграция:
+
+- `ready()` и `expand()`, на телефонах ещё `requestFullscreen()`; вертикальные свайпы
+  отключены, чтобы движение клубочка не сворачивало приложение;
+- тема берётся из Telegram (`colorScheme`), шапка и фон окрашиваются в цвет игры;
+- отступы Telegram (`safeAreaInset` + `contentSafeAreaInset`) попадают в CSS-переменные
+  `--safe-*`, чтобы HUD и карточки не прятались под шапку;
+- кнопка «назад» в шапке Telegram возвращает в меню, хаптик на угощение и итоги;
+- рекорд дублируется в `CloudStorage` и общий для всех устройств пользователя.
+
+Как подключить бота:
+
+1. В [@BotFather](https://t.me/BotFather): `/newbot`, задать имя и username бота.
+2. `/newapp`, выбрать бота, указать название, описание, картинку 640×360,
+   URL `https://isoer.github.io/cat-chase/` и короткое имя.
+   Ссылка на игру: `https://t.me/<bot>/<app>`.
+3. Либо `/mybots` → бот → Bot Settings → Main Mini App → Enable, тот же URL.
+   В профиле бота появится кнопка «Launch app», ссылка `https://t.me/<bot>?startapp`.
+4. По желанию `/setmenubutton`: кнопка запуска в чате с ботом.
+
+Отладка: Telegram Desktop → Settings → Advanced → Experimental settings →
+Enable webview inspecting, затем правый клик в мини-аппе → Inspect.

@@ -1,11 +1,14 @@
 import './style.css';
 import { Game, type GameStats } from './game';
+import { cloudGet, cloudSet, haptic, initTelegram, showBackButton } from './telegram';
 
 const MIN_HUNGER = 3;
 const MAX_HUNGER = 20;
 const DEFAULT_HUNGER = 7;
 const HUNGER_KEY = 'cat-chase:hunger';
 const BEST_KEY = 'cat-chase:best';
+/** Telegram cloud storage allows only letters, digits, `_` and `-` in keys. */
+const CLOUD_BEST_KEY = 'best';
 
 const $ = <T extends HTMLElement>(sel: string): T => document.querySelector<T>(sel)!;
 
@@ -95,6 +98,7 @@ function startGame(): void {
   menu.hidden = true;
   gameover.hidden = true;
   hud.hidden = false;
+  showBackButton(true);
   game.start(clampHunger(Number(hungerInput.value)));
   renderHud(true);
 }
@@ -102,6 +106,7 @@ function startGame(): void {
 function showMenu(): void {
   gameover.hidden = true;
   hud.hidden = true;
+  showBackButton(false);
   showBest();
   menu.hidden = false;
   game.showMenu();
@@ -109,17 +114,24 @@ function showMenu(): void {
 
 function showResults(stats: GameStats): void {
   const best = load(BEST_KEY) ?? 0;
-  if (stats.treats > best) save(BEST_KEY, stats.treats);
+  const record = stats.treats > best;
+  if (record) {
+    save(BEST_KEY, stats.treats);
+    cloudSet(CLOUD_BEST_KEY, String(stats.treats));
+  }
   $('#r-treats').textContent = String(stats.treats);
   $('#r-stolen').textContent = String(stats.stolen);
   $('#r-max').textContent = String(stats.maxCats);
   $('#r-time').textContent = `${Math.round(stats.time)} с`;
-  $('#r-best').hidden = stats.treats <= best || stats.treats === 0;
+  $('#r-best').hidden = !record;
+  if (record) haptic.success();
+  else haptic.warning();
   hud.hidden = true;
   gameover.hidden = false;
 }
 
 game.onGameOver = showResults;
+game.onTreat = () => haptic.tap();
 $('#start').addEventListener('click', startGame);
 $('#again').addEventListener('click', startGame);
 $('#to-menu').addEventListener('click', showMenu);
@@ -163,6 +175,26 @@ function frame(now: number): void {
   if (game.phase === 'playing') renderHud();
   requestAnimationFrame(frame);
 }
+
+/* ---------- Telegram ---------- */
+
+initTelegram({
+  onTheme: (scheme) => {
+    document.documentElement.dataset.theme = scheme;
+  },
+  onBack: showMenu,
+});
+
+/** The record travels with the Telegram account: take the cloud value when it beats the local one. */
+cloudGet(CLOUD_BEST_KEY, (value) => {
+  const cloudBest = Number(value);
+  if (value !== null && Number.isFinite(cloudBest) && cloudBest > (load(BEST_KEY) ?? 0)) {
+    save(BEST_KEY, cloudBest);
+    showBest();
+  }
+});
+
+/* ---------- start ---------- */
 
 setHunger(load(HUNGER_KEY) ?? DEFAULT_HUNGER);
 placeYarn();

@@ -1,5 +1,10 @@
 /* Layout: a full-screen playground (#stage) with one floating control card pinned top-left. */
 :root {
+  /* Insets around the screen; Telegram overrides them from its own safe-area data (see src/telegram.ts). */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
   --bg: #fff6f8;
   --dots: #ffd9e3;
   --fg: #4b2d46;
@@ -26,10 +31,6 @@
     --muted: #b899b0;
     --accent: #ff8db3;
     --accent-soft: #5a3550;
-  --dog: #8cc9ff;
-  --warn: #ff7b94;
-  --on-accent: #2a1a2e;
-  --veil: rgba(30, 22, 40, 0.62);
     --dog: #8cc9ff;
     --warn: #ff7b94;
     --on-accent: #2a1a2e;
@@ -49,6 +50,10 @@
   --muted: #b899b0;
   --accent: #ff8db3;
   --accent-soft: #5a3550;
+  --dog: #8cc9ff;
+  --warn: #ff7b94;
+  --on-accent: #2a1a2e;
+  --veil: rgba(30, 22, 40, 0.62);
   --card: rgba(51, 39, 66, 0.92);
   --line: #4d3a59;
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
@@ -127,8 +132,8 @@ body {
 
 .panel {
   position: fixed;
-  top: calc(16px + env(safe-area-inset-top, 0px));
-  left: 16px;
+  top: calc(16px + var(--safe-top));
+  left: calc(16px + var(--safe-left));
   z-index: 10;
   width: min(280px, calc(100vw - 32px));
 }
@@ -168,7 +173,8 @@ body {
   display: grid;
   place-items: center;
   padding: 16px;
-  padding-block: calc(16px + env(safe-area-inset-top, 0px)) calc(16px + env(safe-area-inset-bottom, 0px));
+  padding-block: calc(16px + var(--safe-top)) calc(16px + var(--safe-bottom));
+  padding-inline: calc(16px + var(--safe-left)) calc(16px + var(--safe-right));
   background: var(--veil);
   pointer-events: none;
 }

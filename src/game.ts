@@ -39,6 +39,8 @@ export class Game {
   hunger = 7;
   stats: GameStats = { treats: 0, stolen: 0, maxCats: 0, time: 0 };
   onGameOver?: (stats: GameStats) => void;
+  /** A cat just ate a treat. */
+  onTreat?: () => void;
 
   private readonly stage: HTMLElement;
   private readonly keepClear: HTMLElement;
@@ -126,6 +128,7 @@ export class Game {
       if (cat) {
         this.removeItem(item);
         this.stats.treats++;
+        this.onTreat?.();
         this.hunger = this.hungerLimit;
         cat.cheer();
         if (this.cats.length < MAX_CATS) {
