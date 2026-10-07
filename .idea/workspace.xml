@@ -23,23 +23,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0000000000000002" />
-      <entry key="MS500" value="1.0007178650648114" />
-      <entry key="S2" value="1.1672110713520958" />
-      <entry key="S5" value="1.589290402761447" />
-      <entry key="S10" value="2.01966115578052" />
-      <entry key="S30" value="2.7768029622907413" />
-      <entry key="S60" value="3.9653808065273344" />
-      <entry key="M2" value="5.773259293161238" />
-      <entry key="M5" value="7.866746353449604" />
-      <entry key="M10" value="8.841320918163822" />
-      <entry key="M15" value="9.205465042987978" />
-      <entry key="M30" value="9.591254310091099" />
-      <entry key="H1" value="9.79267259411566" />
-      <entry key="H2" value="9.89558675492712" />
-      <entry key="H4" value="9.947604611567233" />
-      <entry key="D1" value="9.99124109978635" />
-      <entry key="W1" value="9.998748082046319" />
+      <entry key="MS100" value="1.9491501136719873" />
+      <entry key="MS500" value="4.475993457021661" />
+      <entry key="S2" value="7.428897753240051" />
+      <entry key="S5" value="8.785841101907394" />
+      <entry key="S10" value="9.356021789389615" />
+      <entry key="S30" value="9.776494780203107" />
+      <entry key="S60" value="9.889348841376625" />
+      <entry key="M2" value="10.080806763339108" />
+      <entry key="M5" value="11.741681369165232" />
+      <entry key="M10" value="14.175808047479235" />
+      <entry key="M15" value="15.58547147878421" />
+      <entry key="M30" value="17.472343737574494" />
+      <entry key="H1" value="18.64384336907717" />
+      <entry key="H2" value="19.297104791600567" />
+      <entry key="H4" value="19.642116967663576" />
+      <entry key="D1" value="19.93943868745047" />
+      <entry key="W1" value="19.99132572679393" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -61,23 +61,23 @@
       <entry key="W1" value="0.0" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9659363289248457" />
-      <entry key="MS500" value="0.9938073811835207" />
-      <entry key="S2" value="1.1652998440649398" />
-      <entry key="S5" value="1.5882801279052396" />
-      <entry key="S10" value="2.01899063377127" />
-      <entry key="S30" value="2.7764709269535306" />
-      <entry key="S60" value="3.965131082020715" />
-      <entry key="M2" value="5.773071337321252" />
-      <entry key="M5" value="7.866642020471188" />
-      <entry key="M10" value="8.841261971896728" />
-      <entry key="M15" value="9.205424057026582" />
-      <entry key="M30" value="9.591232922793173" />
-      <entry key="H1" value="9.792661667024399" />
-      <entry key="H2" value="9.89558123174516" />
-      <entry key="H4" value="9.947601834904948" />
-      <entry key="D1" value="9.991240634902164" />
-      <entry key="W1" value="9.998748015582503" />
+      <entry key="MS100" value="1.8738738889459527" />
+      <entry key="MS500" value="4.440035223845401" />
+      <entry key="S2" value="7.413934003535923" />
+      <entry key="S5" value="8.77876926629437" />
+      <entry key="S10" value="9.352258256058468" />
+      <entry key="S30" value="9.775184382408936" />
+      <entry key="S60" value="9.888686154528383" />
+      <entry key="M2" value="10.080469147975043" />
+      <entry key="M5" value="11.741524261994552" />
+      <entry key="M10" value="14.17571320226994" />
+      <entry key="M15" value="15.585401940623205" />
+      <entry key="M30" value="17.472304740376487" />
+      <entry key="H1" value="18.643822556510894" />
+      <entry key="H2" value="19.29709401876869" />
+      <entry key="H4" value="19.642111484427687" />
+      <entry key="D1" value="19.939437759669442" />
+      <entry key="W1" value="19.991325593907007" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo"><![CDATA[{
@@ -100,11 +100,14 @@
     "git-widget-placeholder": "main",
     "last_opened_file_path": "/Users/morsoen/PycharmProjects/cat-chase",
     "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "npm.dev.executor": "Run",
     "python.packages.toolwindow.project.migrated.to.right.top.v2": "true",
-    "settings.editor.selected.configurable": "org.jetbrains.plugins.github.ui.GithubSettingsConfigurable"
+    "settings.editor.selected.configurable": "org.jetbrains.plugins.github.ui.GithubSettingsConfigurable",
+    "ts.external.directory.path": "/Applications/PyCharm.app/Contents/plugins/javascript-plugin/jsLanguageServicesImpl/external"
   }
 }]]></component>
   <component name="RunManager">
@@ -139,7 +142,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1755068685899</updated>
-      <workItem from="1791375485093" duration="184000" />
+      <workItem from="1791375485093" duration="1495000" />
     </task>
     <servers />
   </component>
