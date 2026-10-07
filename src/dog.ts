@@ -1,6 +1,7 @@
 import { Critter } from './critter';
 import { spawnSpark } from './effects';
 import { itemSvg, type Item, type ItemKind } from './items';
+import { scale } from './scale';
 import { between, dist, nearest, weightedPick, type Vec } from './vec';
 import type { World } from './world';
 
@@ -101,7 +102,7 @@ export class Dog extends Critter {
 
   /** True once the dog has run off the edge of the screen. */
   get gone(): boolean {
-    const m = GONE_MARGIN;
+    const m = GONE_MARGIN * scale;
     return (
       this.state === 'leaving' &&
       (this.pos.x < -m || this.pos.x > window.innerWidth + m || this.pos.y < -m || this.pos.y > window.innerHeight + m)
@@ -111,7 +112,7 @@ export class Dog extends Critter {
   update(dt: number, world: World): void {
     if (!this.announced && this.onScreen()) {
       this.announced = true;
-      spawnSpark(this.stage, this.pos.x, this.pos.y - 36, 'гав!', { cls: 'bark', size: 15 });
+      spawnSpark(this.stage, this.pos.x, this.pos.y - 36 * scale, 'гав!', { cls: 'bark', size: 15 });
     }
 
     if (this.state === 'hunting') {
@@ -145,7 +146,7 @@ export class Dog extends Critter {
     this.target = null;
     const w = window.innerWidth;
     const h = window.innerHeight;
-    const m = EXIT_MARGIN;
+    const m = EXIT_MARGIN * scale;
     const exits: Vec[] = [
       { x: this.pos.x, y: -m },
       { x: w + m, y: this.pos.y },

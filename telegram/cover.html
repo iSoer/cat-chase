@@ -1,0 +1,152 @@
+<!doctype html>
+<!--
+  Обложка 640×360 для BotFather (/newapp и Main Mini App).
+  Собирается из настоящих спрайтов игры (src/cat.ts, src/dog.ts, src/items.ts).
+  Рендер: `npx vite --port 5199`, затем скриншот http://127.0.0.1:5199/telegram/cover.html
+  в headless Chrome с --window-size=640,360 (см. README).
+-->
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=640" />
+    <title>Обложка 640×360</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@800&family=Nunito:wght@600;700&display=swap" />
+    <style>
+      :root {
+        --bg: #fff6f8;
+        --dots: #ffd9e3;
+        --fg: #4b2d46;
+        --muted: #9b7893;
+        --accent: #ff6f9c;
+        --on-accent: #ffffff;
+        --cat-shadow: rgba(90, 40, 70, 0.16);
+      }
+      html, body { margin: 0; background: var(--bg); }
+      #cover {
+        position: relative;
+        width: 640px;
+        height: 360px;
+        overflow: hidden;
+        color: var(--fg);
+        font-family: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+        background-color: var(--bg);
+        background-image: radial-gradient(var(--dots) 2px, transparent 2.6px);
+        background-size: 28px 28px;
+      }
+      .title { position: absolute; left: 40px; top: 50px; width: 300px; z-index: 1000; }
+      h1 {
+        margin: 0;
+        font-family: 'Baloo 2', sans-serif;
+        font-weight: 800;
+        font-size: 50px;
+        line-height: 0.98;
+      }
+      .title p { margin: 12px 0 0; font-size: 15.5px; line-height: 1.4; font-weight: 600; color: var(--muted); }
+      .pill {
+        display: inline-block;
+        margin-top: 18px;
+        padding: 8px 20px 10px;
+        border-radius: 999px;
+        background: var(--accent);
+        color: var(--on-accent);
+        font-family: 'Baloo 2', sans-serif;
+        font-weight: 800;
+        font-size: 17px;
+        box-shadow: 0 8px 20px rgba(255, 111, 156, 0.35);
+      }
+      .strand { position: absolute; inset: 0; width: 640px; height: 360px; pointer-events: none; }
+      .sprite { position: absolute; }
+      .sprite svg { display: block; width: 100%; height: 100%; overflow: visible; }
+      .sprite .eyes-happy { display: none; }
+      .sprite.glad .eyes-open { display: none; }
+      .sprite.glad .eyes-happy { display: block; }
+      .shadow { position: absolute; transform: translate(-50%, -50%); border-radius: 50%; background: var(--cat-shadow); filter: blur(2px); }
+      .yarn { filter: drop-shadow(0 3px 4px rgba(90, 40, 70, 0.25)); }
+      .spark { position: absolute; transform: translate(-50%, -50%); color: var(--accent); font-weight: 700; line-height: 1; }
+    </style>
+  </head>
+  <body>
+    <div id="cover">
+      <svg class="strand" viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M548 212 C 600 230, 640 180, 700 190" fill="none" stroke="#e5628f" stroke-width="2.4" stroke-linecap="round" opacity=".9" />
+      </svg>
+      <div class="title">
+        <h1>Котики-догонялки</h1>
+        <p>Води клубочком: котики бегут следом и собирают угощения. Собачки тоже хотят вкусняшек.</p>
+        <span class="pill">Начать игру</span>
+      </div>
+    </div>
+
+    <script type="module">
+      import { catSvg, PALETTES } from '../src/cat';
+      import { dogSvg, DOG_PALETTES } from '../src/dog';
+      import { itemSvg } from '../src/items';
+
+      const cover = document.getElementById('cover');
+      const cat = (name) => catSvg(PALETTES.find((p) => p.name === name));
+      const dog = (name) => dogSvg(DOG_PALETTES.find((p) => p.name === name));
+
+      const yarnSvg = `
+<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+  <defs><clipPath id="yarn-clip"><circle cx="20" cy="20" r="13" /></clipPath></defs>
+  <path d="M30 29 q9 5 5 12" fill="none" stroke="#e5628f" stroke-width="2.2" stroke-linecap="round" />
+  <circle cx="20" cy="20" r="13" fill="#ff8fb4" />
+  <g clip-path="url(#yarn-clip)" fill="none" stroke="#e5628f" stroke-width="2" stroke-linecap="round">
+    <path d="M5 15 q15 -7 30 2" />
+    <path d="M4 24 q16 9 32 -2" />
+    <path d="M13 6 q5 14 2 28" />
+    <path d="M28 6 q-7 12 -2 28" />
+  </g>
+</svg>`;
+
+      /** Place an svg sprite centred on (x, y); bigger y draws in front. */
+      function place(svg, { x, y, w, h = w, rot = 0, flip = false, cls = '', shadow = 0 }) {
+        if (shadow) {
+          const s = document.createElement('div');
+          s.className = 'shadow';
+          s.style.cssText = `left:${x}px; top:${y + h * 0.46}px; width:${shadow}px; height:${shadow * 0.22}px; z-index:${Math.round(y) - 1}`;
+          cover.appendChild(s);
+        }
+        const el = document.createElement('div');
+        el.className = `sprite ${cls}`;
+        el.style.cssText =
+          `left:${x - w / 2}px; top:${y - h / 2}px; width:${w}px; height:${h}px; z-index:${Math.round(y)};` +
+          `transform: rotate(${rot}deg) scaleX(${flip ? -1 : 1})`;
+        el.innerHTML = svg;
+        cover.appendChild(el);
+      }
+
+      const critter = (svg, o) => place(svg, { ...o, h: (o.w * 112) / 120 });
+
+      // far row (small), middle, near row (big)
+      critter(cat('cream'), { x: 522, y: 104, w: 66, rot: 8, shadow: 38 });
+      critter(cat('cocoa'), { x: 606, y: 140, w: 80, rot: 10, flip: true, shadow: 46 });
+      critter(cat('lilac'), { x: 440, y: 154, w: 86, rot: -12, shadow: 50 });
+      critter(cat('ginger'), { x: 468, y: 262, w: 124, rot: -6, shadow: 72 });
+      critter(cat('sakura'), { x: 580, y: 300, w: 100, rot: 8, flip: true, cls: 'glad', shadow: 58 });
+      critter(cat('grey'), { x: 372, y: 298, w: 104, rot: -10, shadow: 60 });
+      critter(dog('shiba'), { x: 276, y: 326, w: 98, rot: -8, shadow: 60 });
+
+      place(yarnSvg, { x: 548, y: 212, w: 46, rot: 15, cls: 'yarn' });
+
+      place(itemSvg('fish'), { x: 505, y: 96, w: 34, rot: -15 });
+      place(itemSvg('cookie'), { x: 352, y: 214, w: 30 });
+      place(itemSvg('mouse'), { x: 614, y: 240, w: 32, rot: 10 });
+
+      for (const [x, y, size, rot, glyph] of [
+        [562, 262, 20, -10, '♥'],
+        [592, 244, 15, 12, '♥'],
+        [518, 240, 13, 0, '✦'],
+        [470, 192, 14, -8, '♪'],
+        [410, 236, 11, 15, '♥'],
+      ]) {
+        const s = document.createElement('span');
+        s.className = 'spark';
+        s.textContent = glyph;
+        s.style.cssText = `left:${x}px; top:${y}px; font-size:${size}px; z-index:900; transform: translate(-50%, -50%) rotate(${rot}deg)`;
+        cover.appendChild(s);
+      }
+    </script>
+  </body>
+</html>

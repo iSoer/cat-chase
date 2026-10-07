@@ -1,3 +1,4 @@
+import { scale } from './scale';
 import type { Vec } from './vec';
 
 export type CritterKind = 'cat' | 'dog';
@@ -10,6 +11,7 @@ export abstract class Critter {
 
   protected readonly stage: HTMLElement;
   protected readonly rig: HTMLDivElement;
+  /** Top speed in px/s at scale 1; see src/scale.ts. */
   protected readonly maxSpeed: number;
   protected readonly accel: number;
   protected facing = 1;
@@ -46,12 +48,12 @@ export abstract class Critter {
     const dy = ty - this.pos.y;
     const d = Math.hypot(dx, dy);
     if (d > 0.001) {
-      const ease = arrive ? 0.3 + 0.7 * Math.min(1, d / 90) : 1;
-      const speed = this.maxSpeed * ease;
+      const ease = arrive ? 0.3 + 0.7 * Math.min(1, d / (90 * scale)) : 1;
+      const speed = this.maxSpeed * scale * ease;
       let ax = (dx / d) * speed - this.vel.x;
       let ay = (dy / d) * speed - this.vel.y;
       const a = Math.hypot(ax, ay);
-      const maxA = this.accel * dt;
+      const maxA = this.accel * scale * dt;
       if (a > maxA) {
         ax *= maxA / a;
         ay *= maxA / a;
@@ -60,7 +62,7 @@ export abstract class Critter {
       this.vel.y += ay;
     }
     this.move(dt);
-    if (Math.abs(this.vel.x) > 12) this.facing = this.vel.x > 0 ? 1 : -1;
+    if (Math.abs(this.vel.x) > 12 * scale) this.facing = this.vel.x > 0 ? 1 : -1;
     return d;
   }
 

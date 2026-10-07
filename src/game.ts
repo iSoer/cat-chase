@@ -2,6 +2,7 @@ import { Cat, PALETTES } from './cat';
 import { Dog } from './dog';
 import { spawnSpark } from './effects';
 import { Item, randomKind } from './items';
+import { scale } from './scale';
 import { between, dist, nearest, type Vec } from './vec';
 import type { World } from './world';
 
@@ -124,7 +125,7 @@ export class Game {
   private resolvePickups(): void {
     const hunting = this.dogs.filter((d) => d.state === 'hunting');
     for (const item of [...this.items]) {
-      const cat = nearest(this.cats, item.pos, CAT_PICK);
+      const cat = nearest(this.cats, item.pos, CAT_PICK * scale);
       if (cat) {
         this.removeItem(item);
         this.stats.treats++;
@@ -133,18 +134,18 @@ export class Game {
         cat.cheer();
         if (this.cats.length < MAX_CATS) {
           this.addCat();
-          spawnSpark(this.stage, item.pos.x, item.pos.y - 10, '+1 котик', { cls: 'score-cat', size: 16 });
+          spawnSpark(this.stage, item.pos.x, item.pos.y - 10 * scale, '+1 котик', { cls: 'score-cat', size: 16 });
         } else {
-          spawnSpark(this.stage, item.pos.x, item.pos.y - 10, '+1', { cls: 'score-cat', size: 17 });
+          spawnSpark(this.stage, item.pos.x, item.pos.y - 10 * scale, '+1', { cls: 'score-cat', size: 17 });
         }
         continue;
       }
-      const dog = nearest(hunting, item.pos, DOG_PICK);
+      const dog = nearest(hunting, item.pos, DOG_PICK * scale);
       if (dog) {
         this.removeItem(item);
         this.stats.stolen++;
         dog.grab(item.kind);
-        spawnSpark(this.stage, item.pos.x, item.pos.y - 10, 'утащила!', { cls: 'score-dog', size: 15 });
+        spawnSpark(this.stage, item.pos.x, item.pos.y - 10 * scale, 'утащила!', { cls: 'score-dog', size: 15 });
       }
     }
   }
@@ -161,7 +162,7 @@ export class Game {
   private loseCat(): void {
     const i = Math.floor(Math.random() * this.cats.length);
     const [cat] = this.cats.splice(i, 1);
-    spawnSpark(this.stage, cat.pos.x, cat.pos.y - 34, 'мяу…', { cls: 'sad', size: 14 });
+    spawnSpark(this.stage, cat.pos.x, cat.pos.y - 34 * scale, 'мяу…', { cls: 'sad', size: 14 });
     cat.dispose();
   }
 
@@ -199,14 +200,14 @@ export class Game {
   /** A free spot for a treat: on screen, clear of the HUD, not already under a cat or another treat. */
   private randomItemSpot(): Vec | null {
     const rect = this.keepClear.getBoundingClientRect();
-    const m = 60;
+    const m = 60 * scale;
     const w = window.innerWidth;
     const h = window.innerHeight;
     for (let i = 0; i < 12; i++) {
       const p = { x: between(m, w - m), y: between(m, h - m) };
-      if (p.x < rect.right + 40 && p.y < rect.bottom + 40) continue;
-      if (this.cats.some((c) => dist(c.pos, p) < 90)) continue;
-      if (this.items.some((it) => dist(it.pos, p) < 70)) continue;
+      if (p.x < rect.right + 40 * scale && p.y < rect.bottom + 40 * scale) continue;
+      if (this.cats.some((c) => dist(c.pos, p) < 90 * scale)) continue;
+      if (this.items.some((it) => dist(it.pos, p) < 70 * scale)) continue;
       return p;
     }
     return null;
@@ -216,10 +217,11 @@ export class Game {
 function randomEdgePoint(): Vec {
   const w = window.innerWidth;
   const h = window.innerHeight;
+  const m = 60 * scale;
   switch (Math.floor(Math.random() * 4)) {
-    case 0: return { x: Math.random() * w, y: -60 };
-    case 1: return { x: w + 60, y: Math.random() * h };
-    case 2: return { x: Math.random() * w, y: h + 60 };
-    default: return { x: -60, y: Math.random() * h };
+    case 0: return { x: Math.random() * w, y: -m };
+    case 1: return { x: w + m, y: Math.random() * h };
+    case 2: return { x: Math.random() * w, y: h + m };
+    default: return { x: -m, y: Math.random() * h };
   }
 }

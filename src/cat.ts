@@ -1,5 +1,6 @@
 import { Critter } from './critter';
 import { spawnSpark } from './effects';
+import { scale } from './scale';
 import { between, dist, nearest, weightedPick, type Vec } from './vec';
 import type { World } from './world';
 
@@ -135,17 +136,17 @@ export class Cat extends Critter {
 
   update(dt: number, world: World): void {
     this.stateT += dt;
-    const spot = { x: world.cursor.x + this.offset.x, y: world.cursor.y + this.offset.y };
+    const spot = { x: world.cursor.x + this.offset.x * scale, y: world.cursor.y + this.offset.y * scale };
 
     switch (this.state) {
       case 'running': {
-        const treat = nearest(world.items, this.pos, NOTICE_RUNNING);
+        const treat = nearest(world.items, this.pos, NOTICE_RUNNING * scale);
         if (treat) {
           // Dash for the treat; the pickup itself happens in the world loop when we step on it.
           this.steer(treat.pos.x, treat.pos.y, dt, false);
           break;
         }
-        if (dist(spot, this.pos) < CATCH_DIST) {
+        if (dist(spot, this.pos) < CATCH_DIST * scale) {
           this.setState('tumbling');
           break;
         }
@@ -161,11 +162,11 @@ export class Cat extends Critter {
       case 'cuddling': {
         this.heartT -= dt;
         if (this.heartT <= 0) {
-          spawnSpark(this.stage, this.pos.x + (Math.random() - 0.5) * 44, this.pos.y - 18);
+          spawnSpark(this.stage, this.pos.x + (Math.random() - 0.5) * 44 * scale, this.pos.y - 18 * scale);
           this.heartT = 0.45 + Math.random() * 0.7;
         }
-        const treatNearby = nearest(world.items, this.pos, NOTICE_CUDDLING) !== null;
-        const spotMoved = dist(spot, this.pos) > WAKE_DIST;
+        const treatNearby = nearest(world.items, this.pos, NOTICE_CUDDLING * scale) !== null;
+        const spotMoved = dist(spot, this.pos) > WAKE_DIST * scale;
         if (treatNearby || spotMoved) {
           this.wakeT += dt;
           if (treatNearby || this.wakeT >= this.wakeDelay) this.setState('rising');
@@ -189,7 +190,7 @@ export class Cat extends Critter {
     window.clearTimeout(this.gladTimer);
     this.gladTimer = window.setTimeout(() => this.el.classList.remove('is-glad'), GLAD_MS);
     for (let i = 0; i < 3; i++) {
-      spawnSpark(this.stage, this.pos.x + (Math.random() - 0.5) * 48, this.pos.y - 24);
+      spawnSpark(this.stage, this.pos.x + (Math.random() - 0.5) * 48 * scale, this.pos.y - 24 * scale);
     }
   }
 

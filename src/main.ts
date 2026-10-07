@@ -1,5 +1,6 @@
 import './style.css';
 import { Game, type GameStats } from './game';
+import { updateScale } from './scale';
 import { cloudGet, cloudSet, haptic, initTelegram, showBackButton } from './telegram';
 
 const MIN_HUNGER = 3;
@@ -7,6 +8,8 @@ const MAX_HUNGER = 20;
 const DEFAULT_HUNGER = 7;
 const HUNGER_KEY = 'cat-chase:hunger';
 const BEST_KEY = 'cat-chase:best';
+/** On touch screens the yarn floats this far above the finger, so cats and yarn stay visible. */
+const TOUCH_LIFT = 48;
 /** Telegram cloud storage allows only letters, digits, `_` and `-` in keys. */
 const CLOUD_BEST_KEY = 'best';
 
@@ -24,6 +27,9 @@ const hungerSec = $('#hunger-sec');
 const hungerFill = $('#hunger-fill');
 const bestEl = $('#best');
 
+updateScale();
+window.addEventListener('resize', updateScale);
+
 const game = new Game(stage, hud);
 
 /* ---------- pointer ---------- */
@@ -35,9 +41,10 @@ function placeYarn(): void {
 }
 
 function onPointer(e: PointerEvent): void {
+  const lift = e.pointerType === 'touch' ? TOUCH_LIFT : 0;
   yarnAngle += (e.clientX - game.cursor.x) * 0.6;
   game.cursor.x = e.clientX;
-  game.cursor.y = e.clientY;
+  game.cursor.y = Math.max(0, e.clientY - lift);
   placeYarn();
 }
 
