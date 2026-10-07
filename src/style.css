@@ -658,6 +658,103 @@ button.link:hover {
   color: var(--muted);
 }
 
+/* ---------- Level-up pick ---------- */
+
+.pick {
+  width: min(440px, 100%);
+}
+
+.choices {
+  display: grid;
+  gap: 10px;
+}
+
+.choice {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  column-gap: 12px;
+  row-gap: 2px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--bg);
+  color: var(--fg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.1s ease, border-color 0.15s ease;
+}
+
+.choice .portrait {
+  grid-row: 1 / 3;
+  width: 56px;
+  height: 56px;
+}
+
+.choice .portrait svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.choice .portrait .eyes-happy {
+  display: none;
+}
+
+.choice b {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  line-height: 1.1;
+}
+
+.choice small {
+  font-size: 0.85rem;
+  line-height: 1.3;
+  color: color-mix(in srgb, var(--fg) 70%, var(--muted));
+}
+
+.choice:hover {
+  border-color: var(--accent);
+}
+
+.choice:active {
+  transform: scale(0.98);
+}
+
+.results .wide {
+  grid-column: 1 / -1;
+}
+
+.results .wide dd {
+  font-size: 2rem;
+  color: var(--accent);
+}
+
+/* the field freezes while a cat is being chosen */
+#stage.is-paused .critter *,
+#stage.is-paused .item * {
+  animation-play-state: paused;
+}
+
+/* the golden fish: glowing, restless, and blinking before it swims away */
+.item-gold {
+  z-index: 101;
+}
+
+.item-gold svg {
+  filter: drop-shadow(0 0 6px rgba(255, 196, 70, 0.85));
+}
+
+.item-gold .bob {
+  animation-duration: 0.45s, 0.8s;
+}
+
+.item-gold.is-fading .bob {
+  animation: gold-blink 0.35s ease-in-out infinite alternate;
+}
+
 /* ---------- Touch and small screens ---------- */
 
 button,
@@ -689,6 +786,10 @@ input {
 
 /* portrait phones: the menu card fills the width */
 @media (max-width: 600px) {
+  .actions {
+    grid-template-columns: 1fr;
+  }
+
   .card {
     width: 100%;
     padding: 20px 20px 18px;
@@ -721,6 +822,11 @@ input {
 @keyframes low-pulse {
   from { opacity: 1; }
   to { opacity: 0.55; }
+}
+
+@keyframes gold-blink {
+  from { opacity: 1; }
+  to { opacity: 0.35; }
 }
 
 @keyframes pop-in {

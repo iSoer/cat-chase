@@ -1,5 +1,6 @@
 import { Critter } from './critter';
 import { spawnSpark } from './effects';
+import { PERKS, type Perk } from './perks';
 import { scale } from './scale';
 import { between, dist, nearest, weightedPick, type Vec } from './vec';
 import type { World } from './world';
@@ -36,6 +37,8 @@ const WAKE_DIST = 70;
 const NOTICE_RUNNING = 240;
 /** A cuddling cat only gets up for a treat this close. */
 const NOTICE_CUDDLING = 150;
+/** A sprinter spots treats this many times farther away. */
+const SPRINTER_NOTICE = 2;
 const GLAD_MS = 700;
 
 /** Every cat gets its own pace: lazy ones amble, sprinters dash. */
@@ -57,7 +60,14 @@ function pickPace(): Pace {
   return { speed, accel: speed * 5 + 300, wakeDelay: between(tier.wake[0], tier.wake[1]) };
 }
 
-export function catSvg(p: CatPalette): string {
+/** The Sprinter cat outruns every ordinary tier and never dawdles before getting up. */
+function sprinterPace(): Pace {
+  const speed = between(500, 580);
+  return { speed, accel: speed * 5 + 300, wakeDelay: 0 };
+}
+
+/** `accessory` is extra markup drawn over the head: a special cat's collar, crown or bib. */
+export function catSvg(p: CatPalette, accessory = ''): string {
   const blinkDelay = -(Math.random() * 5).toFixed(2);
   const tabby = p.tabby
     ? `<g fill="none" stroke="${p.line}" stroke-width="3" stroke-linecap="round" opacity=".7">
@@ -113,24 +123,32 @@ export function catSvg(p: CatPalette): string {
       <path d="M22 60 h-12" /><path d="M23 66 l-11 3" />
       <path d="M98 60 h12" /><path d="M97 66 l11 3" />
     </g>
+    ${accessory}
   </g>
 </svg>`;
 }
 
 export class Cat extends Critter {
   state: CatState = 'running';
+  /** Talent of a special cat picked between levels; ordinary cats have none. */
+  readonly perk: Perk | null;
 
   private readonly wakeDelay: number;
+  /** Multiplier on how far this cat notices treats. */
+  private readonly notice: number;
   private stateT = 0;
   private wakeT = 0;
   private heartT = 0;
   private offset: Vec = { x: 0, y: 0 };
   private gladTimer: number | undefined;
 
-  constructor(palette: CatPalette, start: Vec, stage: HTMLElement) {
-    const pace = pickPace();
-    super(stage, 'cat', catSvg(palette), start, pace.speed, pace.accel);
+  constructor(palette: CatPalette, start: Vec, stage: HTMLElement, perk: Perk | null = null) {
+    const pace = perk === 'sprinter' ? sprinterPace() : pickPace();
+    super(stage, 'cat', catSvg(palette, perk ? PERKS[perk].accessory : ''), start, pace.speed, pace.accel);
+    this.perk = perk;
+    this.notice = perk === 'sprinter' ? SPRINTER_NOTICE : 1;
     this.wakeDelay = pace.wakeDelay;
+    if (perk) this.el.classList.add('is-special');
     this.pickSpot();
   }
 
@@ -140,7 +158,7 @@ export class Cat extends Critter {
 
     switch (this.state) {
       case 'running': {
-        const treat = nearest(world.items, this.pos, NOTICE_RUNNING * scale);
+        const treat = nearest(world.items, this.pos, NOTICE_RUNNING * scale * this.notice);
         if (treat) {
           // Dash for the treat; the pickup itself happens in the world loop when we step on it.
           this.steer(treat.pos.x, treat.pos.y, dt, false);
@@ -165,7 +183,7 @@ export class Cat extends Critter {
           spawnSpark(this.stage, this.pos.x + (Math.random() - 0.5) * 44 * scale, this.pos.y - 18 * scale);
           this.heartT = 0.45 + Math.random() * 0.7;
         }
-        const treatNearby = nearest(world.items, this.pos, NOTICE_CUDDLING * scale) !== null;
+        const treatNearby = nearest(world.items, this.pos, NOTICE_CUDDLING * scale * this.notice) !== null;
         const spotMoved = dist(spot, this.pos) > WAKE_DIST * scale;
         if (treatNearby || spotMoved) {
           this.wakeT += dt;

@@ -28,8 +28,10 @@
 
     <section class="hud" id="hud" hidden aria-label="Ход игры">
       <span class="stat" aria-label="Котиков на поле" title="Котиков на поле"><i class="icon" id="icon-cat"></i><b id="cats-count">5</b></span>
-      <span class="stat" aria-label="Угощений собрали котики" title="Угощений собрали котики"><i class="icon" id="icon-fish"></i><span id="score-cats">0</span></span>
-      <span class="stat" aria-label="Угощений утащили собачки" title="Угощений утащили собачки"><i class="icon" id="icon-dog"></i><span id="score-dogs">0</span></span>
+      <span class="stat" aria-label="Угощений до нового котика" title="Угощений до нового котика"><i class="icon" id="icon-fish"></i><span id="progress">0/6</span></span>
+      <span class="stat" aria-label="Очки" title="Очки">
+        <i class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9z" fill="#ffd54f" stroke="#d99a2b" stroke-width="1.3" stroke-linejoin="round" /></svg></i><span id="score">0</span>
+      </span>
       <span class="stat time" aria-label="Котик сбежит через" title="Котик сбежит через"><span id="hunger-sec">7.0 с</span></span>
       <button type="button" class="link" id="quit">В меню</button>
       <div class="bar" role="presentation"><div class="fill" id="hunger-fill"></div></div>
@@ -38,7 +40,8 @@
     <div class="overlay" id="menu">
       <section class="card" aria-label="Начало игры">
         <h1>Котики-догонялки</h1>
-        <p>Води клубочком: котики бегут следом и собирают угощения. За каждое угощение прибегает ещё один котик. Если котики долго ничего не едят, они по одному разбегаются. Собачки тоже хотят вкусняшек.</p>
+        <p>Води клубочком: котики бегут следом и собирают угощения, за каждое прибегает ещё один котик. Голодные котики разбегаются, а собачки норовят утащить вкусняшки.</p>
+        <p>Цель: накормить котиков <span id="win-treats">50</span> угощениями. После каждого уровня к компании просится особенный котик со своим талантом, а серия быстрых угощений умножает очки.</p>
         <div class="counter">
           <label for="hunger">Сколько секунд котики терпят без еды</label>
           <button type="button" id="hunger-minus" aria-label="Меньше секунд">−</button>
@@ -50,12 +53,24 @@
       </section>
     </div>
 
+    <div class="overlay" id="pick" hidden>
+      <section class="card pick" aria-label="Выбор котика">
+        <p class="label" id="pick-level">Уровень 1 пройден</p>
+        <h1>К вам просится новый котик</h1>
+        <p>Выберите, кто присоединится к компании. Особенные котики уходят последними.</p>
+        <div class="choices" id="choices"></div>
+      </section>
+    </div>
+
     <div class="overlay" id="gameover" hidden>
       <section class="card" aria-label="Итоги игры">
-        <h1>Котики разбежались</h1>
+        <h1 id="r-title">Котики разбежались</h1>
         <dl class="results">
+          <div class="wide"><dt>Очки</dt><dd id="r-score">0</dd></div>
           <div><dt>Угощений собрано</dt><dd id="r-treats">0</dd></div>
           <div><dt>Утащили собачки</dt><dd id="r-stolen">0</dd></div>
+          <div><dt>Уровень</dt><dd id="r-level">1</dd></div>
+          <div><dt>Лучшая серия</dt><dd id="r-streak">×0</dd></div>
           <div><dt>Больше всего котиков</dt><dd id="r-max">0</dd></div>
           <div><dt>Продержались</dt><dd id="r-time">0 с</dd></div>
         </dl>

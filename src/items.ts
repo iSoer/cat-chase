@@ -1,8 +1,11 @@
-import type { Vec } from './vec';
+import { dist, type Vec } from './vec';
 
-export type ItemKind = 'fish' | 'mouse' | 'cookie';
+export type ItemKind = 'fish' | 'mouse' | 'cookie' | 'gold';
 
+/** Everyday treats; the golden fish is spawned on purpose, once per level. */
 export const ITEM_KINDS: ItemKind[] = ['fish', 'mouse', 'cookie'];
+/** Seconds a golden fish waits before it swims away. */
+export const GOLD_TTL = 8;
 
 export function randomKind(): ItemKind {
   return ITEM_KINDS[Math.floor(Math.random() * ITEM_KINDS.length)];
@@ -19,6 +22,17 @@ export function itemSvg(kind: ItemKind): string {
   <path d="M19 13 q4 7 0 14" fill="none" stroke="#4f8fd1" stroke-width="1.5" stroke-linecap="round" />
   <circle cx="12" cy="18" r="2.6" fill="#2e1f33" />
   <circle cx="13" cy="17" r="1" fill="#fff" />
+</svg>`;
+    case 'gold':
+      return `
+<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <path d="M27 20 L37 11 L35 20 L37 29 Z" fill="#ffd54f" stroke="#d99a2b" stroke-width="1.5" stroke-linejoin="round" />
+  <path d="M5 20 C 9 9, 24 7, 31 20 C 24 33, 9 31, 5 20 Z" fill="#ffd54f" stroke="#d99a2b" stroke-width="1.5" />
+  <path d="M8 20 C 12 15, 22 15, 27 20" fill="none" stroke="#fff" stroke-width="2" opacity=".7" stroke-linecap="round" />
+  <path d="M19 13 q4 7 0 14" fill="none" stroke="#d99a2b" stroke-width="1.5" stroke-linecap="round" />
+  <circle cx="12" cy="18" r="2.6" fill="#2e1f33" />
+  <circle cx="13" cy="17" r="1" fill="#fff" />
+  <path d="M33 4 l1.2 2.8 2.8 1.2 -2.8 1.2 -1.2 2.8 -1.2 -2.8 -2.8 -1.2 2.8 -1.2 z" fill="#fff6d0" stroke="#d99a2b" stroke-width=".8" stroke-linejoin="round" />
 </svg>`;
     case 'mouse':
       return `
@@ -48,15 +62,31 @@ export class Item {
   readonly el: HTMLDivElement;
   readonly pos: Vec;
   readonly kind: ItemKind;
+  /** The golden fish: worth a lot, wanted by everyone, gone soon. */
+  readonly gold: boolean;
+  /** Seconds left before a golden fish swims away; ordinary treats stay. */
+  ttl: number;
 
   constructor(stage: HTMLElement, kind: ItemKind, pos: Vec) {
     this.kind = kind;
     this.pos = { ...pos };
+    this.gold = kind === 'gold';
+    this.ttl = this.gold ? GOLD_TTL : Infinity;
     this.el = document.createElement('div');
     this.el.className = `item item-${kind}`;
-    this.el.style.transform = `translate3d(${pos.x.toFixed(0)}px, ${pos.y.toFixed(0)}px, 0)`;
     this.el.innerHTML = `<div class="bob">${itemSvg(kind)}</div>`;
+    this.place();
     stage.appendChild(this.el);
+  }
+
+  /** Slide up to `step` px toward a point; magnet cats pull treats this way. */
+  moveToward(target: Vec, step: number): void {
+    const d = dist(this.pos, target);
+    if (d < 0.001) return;
+    const k = Math.min(1, step / d);
+    this.pos.x += (target.x - this.pos.x) * k;
+    this.pos.y += (target.y - this.pos.y) * k;
+    this.place();
   }
 
   /** Burst and disappear after someone picked it up. */
@@ -64,5 +94,9 @@ export class Item {
     const el = this.el;
     el.classList.add('is-gone');
     window.setTimeout(() => el.remove(), 400);
+  }
+
+  private place(): void {
+    this.el.style.transform = `translate3d(${this.pos.x.toFixed(0)}px, ${this.pos.y.toFixed(0)}px, 0)`;
   }
 }

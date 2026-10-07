@@ -90,9 +90,10 @@ export class Dog extends Critter {
   private announced = false;
   private readonly carry: HTMLDivElement;
 
-  constructor(stage: HTMLElement, start: Vec) {
+  /** `speedMul` scales the pace: dogs get quicker with every level. */
+  constructor(stage: HTMLElement, start: Vec, speedMul = 1) {
     const tier = weightedPick(DOG_PACES);
-    const speed = between(tier.speed[0], tier.speed[1]);
+    const speed = between(tier.speed[0], tier.speed[1]) * speedMul;
     const palette = DOG_PALETTES[Math.floor(Math.random() * DOG_PALETTES.length)];
     super(stage, 'dog', dogSvg(palette), start, speed, speed * 5 + 300);
     this.carry = document.createElement('div');
@@ -137,6 +138,13 @@ export class Dog extends Critter {
   grab(kind: ItemKind): void {
     this.carry.innerHTML = itemSvg(kind);
     this.el.classList.add('is-glad');
+    this.leave();
+  }
+
+  /** A guard cat is too close: give up the hunt and run off empty-mouthed. */
+  scare(): void {
+    if (this.state !== 'hunting') return;
+    spawnSpark(this.stage, this.pos.x, this.pos.y - 36 * scale, 'ай!', { cls: 'bark', size: 14 });
     this.leave();
   }
 

@@ -1,8 +1,8 @@
 import './style.css';
 import { catSvg, PALETTES } from './cat';
-import { DOG_PALETTES, dogSvg } from './dog';
-import { Game, type GameStats } from './game';
+import { Game, LEVEL_BONUS, WIN_BONUS, WIN_TREATS, type GameStats } from './game';
 import { itemSvg } from './items';
+import type { PerkInfo } from './perks';
 import { updateScale } from './scale';
 import { cloudGet, cloudSet, haptic, initTelegram, showBackButton } from './telegram';
 
@@ -10,11 +10,11 @@ const MIN_HUNGER = 3;
 const MAX_HUNGER = 20;
 const DEFAULT_HUNGER = 7;
 const HUNGER_KEY = 'cat-chase:hunger';
-const BEST_KEY = 'cat-chase:best';
+const BEST_KEY = 'cat-chase:best-score';
 /** On touch screens the yarn floats this far above the finger, so cats and yarn stay visible. */
 const TOUCH_LIFT = 48;
 /** Telegram cloud storage allows only letters, digits, `_` and `-` in keys. */
-const CLOUD_BEST_KEY = 'best';
+const CLOUD_BEST_KEY = 'best_score';
 
 const $ = <T extends HTMLElement>(sel: string): T => document.querySelector<T>(sel)!;
 
@@ -22,26 +22,30 @@ const stage = $('#stage');
 const yarn = $('#yarn');
 const hud = $('#hud');
 const menu = $('#menu');
+const pick = $('#pick');
 const gameover = $('#gameover');
+const choicesEl = $('#choices');
 const hungerInput = $<HTMLInputElement>('#hunger');
 const catsCount = $('#cats-count');
-const scoreCats = $('#score-cats');
-const scoreDogs = $('#score-dogs');
+const progressEl = $('#progress');
+const scoreEl = $('#score');
 const hungerSec = $('#hunger-sec');
 const hungerFill = $('#hunger-fill');
 const bestEl = $('#best');
+const againBtn = $<HTMLButtonElement>('#again');
 
 updateScale();
 window.addEventListener('resize', updateScale);
 
 const game = new Game(stage, hud);
+if (import.meta.env.DEV) Object.assign(window, { game }); // handy in the dev console
 
-/* ---------- HUD icons: the game's own sprites, cropped to a portrait ---------- */
+/* ---------- icons: the game's own sprites, cropped to a portrait ---------- */
 
 const portrait = (svg: string, viewBox: string): string => svg.replace(/viewBox="[^"]*"/, `viewBox="${viewBox}"`);
 $('#icon-cat').innerHTML = portrait(catSvg(PALETTES[1]), '22 4 76 76');
-$('#icon-dog').innerHTML = portrait(dogSvg(DOG_PALETTES[0]), '8 12 104 76');
 $('#icon-fish').innerHTML = itemSvg('fish');
+$('#win-treats').textContent = String(WIN_TREATS);
 
 /* ---------- pointer ---------- */
 
@@ -99,7 +103,7 @@ hungerInput.addEventListener('change', () => setHunger(Number(hungerInput.value)
 function showBest(): void {
   const best = load(BEST_KEY);
   bestEl.hidden = best === null || best <= 0;
-  if (best !== null) bestEl.textContent = `Рекорд: ${best} ${plural(best, 'угощение', 'угощения', 'угощений')}`;
+  if (best !== null) bestEl.textContent = `Рекорд: ${best} ${plural(best, 'очко', 'очка', 'очков')}`;
 }
 
 function plural(n: number, one: string, few: string, many: string): string {
@@ -114,6 +118,7 @@ function plural(n: number, one: string, few: string, many: string): string {
 
 function startGame(): void {
   menu.hidden = true;
+  pick.hidden = true;
   gameover.hidden = true;
   hud.hidden = false;
   showBackButton(true);
@@ -122,6 +127,7 @@ function startGame(): void {
 }
 
 function showMenu(): void {
+  pick.hidden = true;
   gameover.hidden = true;
   hud.hidden = true;
   showBackButton(false);
@@ -130,36 +136,86 @@ function showMenu(): void {
   game.showMenu();
 }
 
-function showResults(stats: GameStats): void {
+/** Level done: the card with three special cats; the game stays frozen until one is chosen. */
+function showPick(level: number, won: boolean): void {
+  const bonus = won ? WIN_BONUS : LEVEL_BONUS * level;
+  $('#pick-level').textContent = `Уровень ${level} пройден · +${bonus} очков`;
+  choicesEl.replaceChildren(...game.choices.map(choiceButton));
+  gameover.hidden = true;
+  hud.hidden = false;
+  pick.hidden = false;
+}
+
+function choiceButton(info: PerkInfo): HTMLButtonElement {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'choice';
+  b.innerHTML =
+    `<span class="portrait">${portrait(catSvg(info.palette, info.accessory), '22 4 76 76')}</span>` +
+    `<b>${info.name}</b><small>${info.desc}</small>`;
+  b.addEventListener('click', () => {
+    haptic.tap();
+    game.choose(info);
+    pick.hidden = true;
+    renderHud(true);
+  });
+  return b;
+}
+
+/** Results after a win or after the last cat left; a win can be played on. */
+function showResults(stats: GameStats, won: boolean): void {
   const best = load(BEST_KEY) ?? 0;
-  const record = stats.treats > best;
+  const record = stats.score > best;
   if (record) {
-    save(BEST_KEY, stats.treats);
-    cloudSet(CLOUD_BEST_KEY, String(stats.treats));
+    save(BEST_KEY, stats.score);
+    cloudSet(CLOUD_BEST_KEY, String(stats.score));
   }
+  $('#r-title').textContent = won ? 'Победа! Котики наелись' : 'Котики разбежались';
+  $('#r-score').textContent = String(stats.score);
   $('#r-treats').textContent = String(stats.treats);
   $('#r-stolen').textContent = String(stats.stolen);
+  $('#r-level').textContent = String(stats.level);
+  $('#r-streak').textContent = `×${stats.bestStreak}`;
   $('#r-max').textContent = String(stats.maxCats);
   $('#r-time').textContent = `${Math.round(stats.time)} с`;
   $('#r-best').hidden = !record;
-  if (record) haptic.success();
+  againBtn.textContent = won ? 'Играть дальше' : 'Ещё раз';
+  if (won || record) haptic.success();
   else haptic.warning();
   hud.hidden = true;
   gameover.hidden = false;
 }
 
-game.onGameOver = showResults;
+/** The level whose pick card is pending; after a win the card waits behind the results. */
+let pendingLevel = 0;
+
+game.onLevelComplete = (level, won) => {
+  pendingLevel = level;
+  renderHud(true); // the HUD under the card already shows the next level
+  if (won) {
+    showResults(game.stats, true);
+  } else {
+    haptic.success();
+    showPick(level, false);
+  }
+};
+game.onGameOver = (stats) => showResults(stats, false);
 game.onTreat = () => haptic.tap();
+
 $('#start').addEventListener('click', startGame);
-$('#again').addEventListener('click', startGame);
+againBtn.addEventListener('click', () => {
+  // After a win the game is paused on a pick; "play on" means choosing the next cat.
+  if (game.phase === 'pick') showPick(pendingLevel, true);
+  else startGame();
+});
 $('#to-menu').addEventListener('click', showMenu);
 $('#quit').addEventListener('click', showMenu);
 
 /* ---------- HUD ---------- */
 
 let lastCats = -1;
-let lastTreats = -1;
-let lastStolen = -1;
+let lastProgress = '';
+let lastScore = -1;
 let lastSec = '';
 
 function renderHud(force = false): void {
@@ -168,13 +224,14 @@ function renderHud(force = false): void {
     lastCats = n;
     catsCount.textContent = String(n);
   }
-  if (force || game.stats.treats !== lastTreats) {
-    lastTreats = game.stats.treats;
-    scoreCats.textContent = String(lastTreats);
+  const progress = `${game.progress}/${game.need}`;
+  if (force || progress !== lastProgress) {
+    lastProgress = progress;
+    progressEl.textContent = progress;
   }
-  if (force || game.stats.stolen !== lastStolen) {
-    lastStolen = game.stats.stolen;
-    scoreDogs.textContent = String(lastStolen);
+  if (force || game.stats.score !== lastScore) {
+    lastScore = game.stats.score;
+    scoreEl.textContent = String(lastScore);
   }
   const sec = `${Math.max(0, game.hunger).toFixed(1)} с`;
   if (force || sec !== lastSec) {
