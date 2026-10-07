@@ -201,11 +201,12 @@ export class Game {
   private randomItemSpot(): Vec | null {
     const rect = this.keepClear.getBoundingClientRect();
     const m = 60 * scale;
+    const pad = 40 * scale;
     const w = window.innerWidth;
     const h = window.innerHeight;
     for (let i = 0; i < 12; i++) {
       const p = { x: between(m, w - m), y: between(m, h - m) };
-      if (p.x < rect.right + 40 * scale && p.y < rect.bottom + 40 * scale) continue;
+      if (p.y < rect.bottom + pad && p.x > rect.left - pad && p.x < rect.right + pad) continue;
       if (this.cats.some((c) => dist(c.pos, p) < 90 * scale)) continue;
       if (this.items.some((it) => dist(it.pos, p) < 70 * scale)) continue;
       return p;

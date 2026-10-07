@@ -121,7 +121,6 @@ body {
   display: none !important;
 }
 
-.panel,
 .card {
   display: grid;
   gap: 10px;
@@ -132,14 +131,6 @@ body {
   border: 1px solid var(--line);
   border-radius: 22px;
   box-shadow: var(--shadow);
-}
-
-.panel {
-  position: fixed;
-  top: calc(16px + var(--safe-top));
-  left: calc(16px + var(--safe-left));
-  z-index: 10;
-  width: min(280px, calc(100vw - 32px));
 }
 
 .card {
@@ -322,36 +313,77 @@ button.secondary:active {
   font-variant-numeric: tabular-nums;
 }
 
-/* in-game HUD */
+/* in-game HUD: one slim pill at the top, the hunger clock is the line along its bottom edge */
 .hud {
-  gap: 8px;
-}
-
-.hud-row {
+  position: fixed;
+  top: calc(8px + var(--safe-top));
+  left: 50%;
+  z-index: 10;
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 10px;
-  font-size: 0.88rem;
-  font-weight: 600;
+  align-items: center;
+  gap: 14px;
+  height: 36px;
+  max-width: calc(100vw - 24px - var(--safe-left) - var(--safe-right));
+  padding: 0 14px;
+  transform: translateX(-50%);
+  background: var(--card);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+  font-size: 0.9rem;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
-.hud-row .big {
+.hud .stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.hud .icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+}
+
+.hud .icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.hud .icon .eyes-happy {
+  display: none;
+}
+
+.hud #cats-count {
   font-family: var(--font-display);
-  font-size: 1.6rem;
+  font-size: 1.15rem;
   font-weight: 800;
   line-height: 1;
   color: var(--accent);
 }
 
-.hunger {
-  display: grid;
-  gap: 6px;
+.hud .time {
+  color: var(--muted);
 }
 
-.bar {
-  height: 8px;
+.hud .time .is-low {
+  color: var(--warn);
+}
+
+.hud .bar {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 0;
+  height: 3px;
   border-radius: 999px;
   background: var(--accent-soft);
   overflow: hidden;
@@ -371,7 +403,6 @@ button.secondary:active {
 }
 
 button.link {
-  justify-self: start;
   padding: 0;
   border: 0;
   background: none;
@@ -656,53 +687,8 @@ input {
   }
 }
 
-/* phones, portrait or landscape: the HUD becomes one compact bar at the top */
-@media (max-width: 600px), (max-height: 480px) {
-  .panel {
-    width: auto;
-    max-width: calc(100vw - 32px - var(--safe-left) - var(--safe-right));
-  }
-
-  .hud {
-    grid-template-columns: auto 1fr auto;
-    align-items: baseline;
-    gap: 6px 12px;
-    padding: 10px 14px;
-  }
-
-  .hud-row {
-    justify-content: flex-start;
-    gap: 8px;
-    font-size: 0.82rem;
-  }
-
-  .hud-row .big {
-    font-size: 1.4rem;
-  }
-
-  /* "котики 3 · собачки 1" explains itself */
-  .hud .hud-row:nth-child(2) .label {
-    display: none;
-  }
-
-  .hud .hunger {
-    grid-column: 1 / -1;
-  }
-
-  .hud .link {
-    grid-row: 1;
-    grid-column: 3;
-    justify-self: end;
-    white-space: nowrap;
-  }
-}
-
-/* portrait phones: the bar spans the width, the menu card fills it */
+/* portrait phones: the menu card fills the width */
 @media (max-width: 600px) {
-  .panel {
-    right: calc(16px + var(--safe-right));
-  }
-
   .card {
     width: 100%;
     padding: 20px 20px 18px;

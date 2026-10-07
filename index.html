@@ -26,23 +26,13 @@
       </div>
     </div>
 
-    <section class="panel hud" id="hud" hidden aria-label="Ход игры">
-      <div class="hud-row">
-        <span class="label">Котиков</span>
-        <b class="big" id="cats-count">5</b>
-      </div>
-      <div class="hud-row">
-        <span class="label">Собрано</span>
-        <span id="score">котики 0 · собачки 0</span>
-      </div>
-      <div class="hunger">
-        <div class="hud-row">
-          <span class="label">Котик сбежит через</span>
-          <span id="hunger-sec">7.0 с</span>
-        </div>
-        <div class="bar" role="presentation"><div class="fill" id="hunger-fill"></div></div>
-      </div>
+    <section class="hud" id="hud" hidden aria-label="Ход игры">
+      <span class="stat" aria-label="Котиков на поле" title="Котиков на поле"><i class="icon" id="icon-cat"></i><b id="cats-count">5</b></span>
+      <span class="stat" aria-label="Угощений собрали котики" title="Угощений собрали котики"><i class="icon" id="icon-fish"></i><span id="score-cats">0</span></span>
+      <span class="stat" aria-label="Угощений утащили собачки" title="Угощений утащили собачки"><i class="icon" id="icon-dog"></i><span id="score-dogs">0</span></span>
+      <span class="stat time" aria-label="Котик сбежит через" title="Котик сбежит через"><span id="hunger-sec">7.0 с</span></span>
       <button type="button" class="link" id="quit">В меню</button>
+      <div class="bar" role="presentation"><div class="fill" id="hunger-fill"></div></div>
     </section>
 
     <div class="overlay" id="menu">

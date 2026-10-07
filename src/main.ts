@@ -1,5 +1,8 @@
 import './style.css';
+import { catSvg, PALETTES } from './cat';
+import { DOG_PALETTES, dogSvg } from './dog';
 import { Game, type GameStats } from './game';
+import { itemSvg } from './items';
 import { updateScale } from './scale';
 import { cloudGet, cloudSet, haptic, initTelegram, showBackButton } from './telegram';
 
@@ -22,7 +25,8 @@ const menu = $('#menu');
 const gameover = $('#gameover');
 const hungerInput = $<HTMLInputElement>('#hunger');
 const catsCount = $('#cats-count');
-const scoreEl = $('#score');
+const scoreCats = $('#score-cats');
+const scoreDogs = $('#score-dogs');
 const hungerSec = $('#hunger-sec');
 const hungerFill = $('#hunger-fill');
 const bestEl = $('#best');
@@ -31,6 +35,13 @@ updateScale();
 window.addEventListener('resize', updateScale);
 
 const game = new Game(stage, hud);
+
+/* ---------- HUD icons: the game's own sprites, cropped to a portrait ---------- */
+
+const portrait = (svg: string, viewBox: string): string => svg.replace(/viewBox="[^"]*"/, `viewBox="${viewBox}"`);
+$('#icon-cat').innerHTML = portrait(catSvg(PALETTES[1]), '22 4 76 76');
+$('#icon-dog').innerHTML = portrait(dogSvg(DOG_PALETTES[0]), '8 12 104 76');
+$('#icon-fish').innerHTML = itemSvg('fish');
 
 /* ---------- pointer ---------- */
 
@@ -147,7 +158,8 @@ $('#quit').addEventListener('click', showMenu);
 /* ---------- HUD ---------- */
 
 let lastCats = -1;
-let lastScore = '';
+let lastTreats = -1;
+let lastStolen = -1;
 let lastSec = '';
 
 function renderHud(force = false): void {
@@ -156,10 +168,13 @@ function renderHud(force = false): void {
     lastCats = n;
     catsCount.textContent = String(n);
   }
-  const score = `котики ${game.stats.treats} · собачки ${game.stats.stolen}`;
-  if (force || score !== lastScore) {
-    lastScore = score;
-    scoreEl.textContent = score;
+  if (force || game.stats.treats !== lastTreats) {
+    lastTreats = game.stats.treats;
+    scoreCats.textContent = String(lastTreats);
+  }
+  if (force || game.stats.stolen !== lastStolen) {
+    lastStolen = game.stats.stolen;
+    scoreDogs.textContent = String(lastStolen);
   }
   const sec = `${Math.max(0, game.hunger).toFixed(1)} с`;
   if (force || sec !== lastSec) {
@@ -168,7 +183,9 @@ function renderHud(force = false): void {
   }
   const ratio = Math.max(0, Math.min(1, game.hunger / game.hungerLimit));
   hungerFill.style.transform = `scaleX(${ratio.toFixed(3)})`;
-  hungerFill.classList.toggle('is-low', game.hunger < 2.5);
+  const low = game.hunger < 2.5;
+  hungerFill.classList.toggle('is-low', low);
+  hungerSec.classList.toggle('is-low', low);
 }
 
 /* ---------- loop ---------- */
